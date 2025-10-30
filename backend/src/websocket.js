@@ -1,4 +1,12 @@
 const WebSocket = require('ws');
+const config = require('./config');
+
+const normalizeOrigin = (origin) => {
+  if (!origin) {
+    return origin;
+  }
+  return origin.endsWith('/') ? origin.slice(0, -1) : origin;
+};
 
 class WebSocketManager {
   constructor() {
@@ -8,13 +16,26 @@ class WebSocketManager {
     this.selectedQuestions = new Set(); // Track selected questions
     this.questionTimes = new Map(); // Map of question ID to user times
     this.lastGreenFrameUser = null; // Track the last user with green frame
+    this.corsOrigins = config.corsOrigins;
+    this.allowAllOrigins = config.allowAllOrigins;
   }
 
   initialize(server) {
-    this.wss = new WebSocket.Server({ server });
+    this.corsOrigins = config.corsOrigins;
+    this.allowAllOrigins = config.allowAllOrigins;
+    this.wss = new WebSocket.Server({ server, path: config.wsPath });
 
     // Send current selected questions to new client
-    this.wss.on('connection', (ws) => {
+    this.wss.on('connection', (ws, req) => {
+      const requestOrigin = req?.headers?.origin ? normalizeOrigin(req.headers.origin) : undefined;
+
+      if (!this.isOriginAllowed(requestOrigin)) {
+        console.warn(`Blocked WebSocket connection from origin: ${req?.headers?.origin || 'unknown'}`);
+        ws.__blockedByCors = true;
+        ws.close(1008, 'Origin not allowed');
+        return;
+      }
+
       console.log('New client connected');
       ws.send(JSON.stringify({
         type: 'selected_questions_update',
@@ -299,6 +320,14 @@ class WebSocketManager {
 
   getOnlineUsers() {
     return Array.from(this.persistentUsers.values());
+  }
+
+  isOriginAllowed(origin) {
+    if (!origin || this.allowAllOrigins) {
+      return true;
+    }
+
+    return this.corsOrigins.includes(origin);
   }
 
   // Add method to get times for a specific question

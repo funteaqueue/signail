@@ -17,8 +17,28 @@ let uploadedPack = null;
 wsManager.initialize(server);
 
 // Middleware
+const normalizeOrigin = (origin) => {
+  if (!origin) {
+    return origin;
+  }
+  return origin.endsWith('/') ? origin.slice(0, -1) : origin;
+};
+
 app.use(cors({
-  origin: config.corsOrigin
+  origin: (origin, callback) => {
+    if (!origin || config.allowAllOrigins) {
+      return callback(null, true);
+    }
+
+    const normalizedOrigin = normalizeOrigin(origin);
+
+    if (config.corsOrigins.includes(normalizedOrigin)) {
+      return callback(null, true);
+    }
+
+    console.warn(`Blocked CORS HTTP request from origin: ${origin}`);
+    return callback(new Error('Not allowed by CORS'));
+  }
 }));
 app.use(express.json({ limit: '250mb' }));
 
@@ -27,6 +47,9 @@ const clients = new Set();
 
 // WebSocket connection handler
 wsManager.wss.on('connection', (ws) => {
+    if (ws.__blockedByCors) {
+        return;
+    }
     clients.add(ws);
     console.log('Client connected');
 
