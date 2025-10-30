@@ -81,6 +81,7 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
     const savedRoundIndex = localStorage.getItem('currentRoundIndex');
     return savedRoundIndex ? parseInt(savedRoundIndex) : 0;
   });
+  const [themeName, setThemeName] = useState('');
   const [timer, setTimer] = useState(15);
   const [startTime, setStartTime] = useState(null);
   const [elapsedTime, setElapsedTime] = useState(null);
@@ -92,12 +93,14 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
     const loadQuestion = async () => {
       try {
         setLoading(true);
+        setThemeName('');
         const pack = await indexedDBService.getPack('current');
         if (!pack) {
           throw new Error('Pack not found');
         }
         let foundQuestion = null;
         let foundRoundIndex = 0;
+        let foundThemeName = '';
         
         // Search through rounds to find the question and its round index
         for (let roundIndex = 0; roundIndex < pack.rounds.length; roundIndex++) {
@@ -107,6 +110,7 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
             if (q) {
               foundQuestion = q;
               foundRoundIndex = roundIndex;
+              foundThemeName = theme.name || '';
               break;
             }
           }
@@ -119,6 +123,7 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
         
         setQuestion(foundQuestion);
         setCurrentRoundIndex(foundRoundIndex);
+        setThemeName(foundThemeName);
         localStorage.setItem('currentRoundIndex', foundRoundIndex.toString());
 
         // Fetch existing times for this question
@@ -375,6 +380,21 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
       maxWidth: '600px'
     }
   };
+  const themeHeaderStyle = {
+    background: 'linear-gradient(180deg, #1a237e 60%, #283593 100%)',
+    color: '#fffde7',
+    fontWeight: 'bold',
+    fontSize: '1.8rem',
+    textAlign: 'center',
+    borderRadius: '10px',
+    margin: '0',
+    padding: '16px',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+    border: '2px solid #fffde7',
+    letterSpacing: '0.08em',
+    textTransform: 'uppercase',
+    userSelect: 'none'
+  };
 
   const buttonStyle = {
     padding: '0.75rem 1.5rem',
@@ -535,6 +555,9 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
         margin: '0 auto 20px auto'
       }}>
         <div style={boardGridStyle}>
+          {themeName && (
+            <div style={themeHeaderStyle}>{themeName}</div>
+          )}
           {renderContent()}
         </div>
       </div>
