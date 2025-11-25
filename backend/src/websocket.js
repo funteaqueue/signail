@@ -126,15 +126,20 @@ class WebSocketManager {
             this.broadcastSelectedQuestions();
             // Broadcast updated user list to all clients
             this.broadcastOnlineUsers();
-          } else if (data.type === 'update_score') {
-            const { userId, score } = data.data;
-            const userData = this.persistentUsers.get(userId);
-            if (userData) {
-              userData.score = score;
-              this.persistentUsers.set(userId, userData);
-              // Broadcast updated user list to all clients
-              this.broadcastOnlineUsers();
-            }
+      } else if (data.type === 'update_score') {
+        const { userId, score } = data.data;
+        const userData = this.persistentUsers.get(userId);
+        if (userData) {
+          const numericScore = Number(score);
+          if (!Number.isFinite(numericScore)) {
+            console.warn(`Ignored invalid score value for user ${userId}:`, score);
+            return;
+          }
+          userData.score = numericScore;
+          this.persistentUsers.set(userId, userData);
+          // Broadcast updated user list to all clients
+          this.broadcastOnlineUsers();
+        }
           } else if (data.type === 'round_change') {
             // Broadcast round change to all clients
             this.broadcastRoundChange(data.data);

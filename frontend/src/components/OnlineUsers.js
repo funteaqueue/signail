@@ -121,7 +121,8 @@ const OnlineUsers = ({ users, elapsedTime, currentUserId, userTimes = {}, isAdmi
         const userTime = userTimes[user.id] ?? (user.id === currentUserId ? elapsedTime : null);
         const isTopThree = topThreeTimes.includes(user.id);
         const position = topThreeTimes.indexOf(user.id);
-        const previousScore = user.score ?? 0;
+        const numericScore = Number(user.score ?? 0);
+        const previousScore = Number.isFinite(numericScore) ? numericScore : 0;
         const isUpdated = updatedUsers.has(user.id);
         const isPenalized = penalizedUsers.has(user.id);
         const hasGreenFrame = greenFrameUsers.has(user.id);
@@ -265,14 +266,16 @@ const OnlineUsers = ({ users, elapsedTime, currentUserId, userTimes = {}, isAdmi
                 suppressContentEditableWarning={true} 
                 onBlur={(e) => {
                   const newScore = e.target.textContent.trim();
-                  if (newScore !== '') {
+                  const parsedScore = Number(newScore);
+                  if (newScore !== '' && Number.isFinite(parsedScore)) {
                     wsManager.ws.send(JSON.stringify({
                       type: 'update_score',
                       data: {
                         userId: user.id,
-                        score: newScore
+                        score: parsedScore
                       }
                     }));
+                    e.target.textContent = parsedScore;
                   } else {
                     // Reset to previous score if empty
                     e.target.textContent = previousScore;
