@@ -19,33 +19,33 @@ const sanitizeHtml = (html) => {
 
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
-  
+
   const sanitizeNode = (node) => {
     if (node.nodeType === Node.TEXT_NODE) {
       return node.textContent;
     }
-    
+
     if (node.nodeType === Node.ELEMENT_NODE) {
       const tagName = node.tagName.toLowerCase();
-      
+
       if (!allowedTags.includes(tagName)) {
         return node.textContent;
       }
-      
+
       const allowedAttrs = allowedAttributes[tagName] || allowedAttributes['*'] || [];
       const sanitizedAttrs = {};
-      
+
       for (const attr of allowedAttrs) {
         if (node.hasAttribute(attr)) {
           sanitizedAttrs[attr] = node.getAttribute(attr);
         }
       }
-      
+
       const sanitizedNode = document.createElement(tagName);
       for (const [attr, value] of Object.entries(sanitizedAttrs)) {
         sanitizedNode.setAttribute(attr, value);
       }
-      
+
       for (const child of node.childNodes) {
         const sanitizedChild = sanitizeNode(child);
         if (typeof sanitizedChild === 'string') {
@@ -54,10 +54,10 @@ const sanitizeHtml = (html) => {
           sanitizedNode.appendChild(sanitizedChild);
         }
       }
-      
+
       return sanitizedNode;
     }
-    
+
     return '';
   };
 
@@ -101,7 +101,7 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
         let foundQuestion = null;
         let foundRoundIndex = 0;
         let foundThemeName = '';
-        
+
         // Search through rounds to find the question and its round index
         for (let roundIndex = 0; roundIndex < pack.rounds.length; roundIndex++) {
           const round = pack.rounds[roundIndex];
@@ -116,11 +116,11 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
           }
           if (foundQuestion) break;
         }
-        
+
         if (!foundQuestion) {
           throw new Error('Question not found');
         }
-        
+
         setQuestion(foundQuestion);
         setCurrentRoundIndex(foundRoundIndex);
         setThemeName(foundThemeName);
@@ -250,10 +250,10 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
   // Add keyboard event listener for space and right arrow
   useEffect(() => {
     const handleKeyPress = (event) => {
-      if ((event.code === 'Space' || event.code === 'ArrowRight') && 
-          ((isAdmin && isQuestionRevealed && !isAnswerRevealed) || (!isAdmin && !isAnswerRevealed)) &&
-          !hasRecordedTime && 
-          !userTimes[currentUserId]) {
+      if ((event.code === 'Space' || event.code === 'ArrowRight') &&
+        ((isAdmin && isQuestionRevealed && !isAnswerRevealed) || (!isAdmin && !isAnswerRevealed)) &&
+        !hasRecordedTime &&
+        !userTimes[currentUserId]) {
         const endTime = Date.now();
         const timeTaken = (endTime - startTime) / 1000; // Convert to seconds
         setElapsedTime(timeTaken);
@@ -319,20 +319,28 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: '#fff', fontSize: '1.5rem' }}>
-        Loading...
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+        <div style={{
+          width: 48,
+          height: 48,
+          border: '4px solid var(--glass-border)',
+          borderTopColor: 'var(--primary)',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite',
+          marginBottom: '1rem'
+        }} />
+        <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+        <div style={{ color: 'var(--text-primary)', fontWeight: '600', fontSize: '1.25rem' }}>Loading...</div>
       </div>
     );
   }
   if (!question) return null;
 
-  // --- Styles matching GameBoard ---
   const pageStyle = {
     padding: 0,
     margin: 0,
     width: '100vw',
     minHeight: '100vh',
-    background: 'linear-gradient(135deg, #10153a 0%, #181f4b 100%)',
     boxSizing: 'border-box',
     display: 'flex',
     flexDirection: 'column',
@@ -341,70 +349,59 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
   const boardGridStyle = {
     display: 'grid',
     gridTemplateColumns: '1fr',
-    gap: '8px',
-    background: 'rgba(26,35,126,0.98)',
-    padding: '2vw',
-    borderRadius: '2vw',
-    boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
+    gap: '1.5rem',
+    padding: '2rem',
+    borderRadius: '16px',
     margin: '0 auto',
     width: '100%',
     maxWidth: '1200px',
-    minWidth: 'min(100vw, 320px)',
   };
   const cardStyle = {
-    background: 'linear-gradient(180deg, #283593 60%, #3949ab 100%)',
-    color: '#ffd600',
-    fontWeight: 'bold',
+    color: 'var(--text-primary)',
+    fontWeight: '600',
     fontSize: '1.3rem',
     textAlign: 'center',
-    borderRadius: '10px',
+    borderRadius: '16px',
     margin: '0',
-    padding: '24px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-    border: '2px solid #fffde7',
+    padding: '2rem',
+    border: '1px solid var(--glass-border)',
     userSelect: 'none',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: '200px',
-    '& img, & video, & audio': {
-      maxWidth: '100%',
-      maxHeight: '400px',
-      margin: '10px 0',
-      borderRadius: '8px',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
-    },
-    '& video, & audio': {
-      width: '100%',
-      maxWidth: '600px'
-    }
+    background: 'var(--glass-bg)',
+    backdropFilter: 'blur(10px)',
+    boxShadow: 'var(--glass-shadow)',
   };
   const themeHeaderStyle = {
-    background: 'linear-gradient(180deg, #1a237e 60%, #283593 100%)',
-    color: '#fffde7',
-    fontWeight: 'bold',
-    fontSize: '1.8rem',
+    color: 'var(--text-primary)',
+    fontWeight: '700',
+    fontSize: '2rem',
     textAlign: 'center',
-    borderRadius: '10px',
+    borderRadius: '12px',
     margin: '0',
-    padding: '16px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-    border: '2px solid #fffde7',
-    letterSpacing: '0.08em',
+    padding: '1rem',
+    background: 'rgba(15, 23, 42, 0.6)',
+    border: '1px solid var(--glass-border)',
+    letterSpacing: '0.05em',
     textTransform: 'uppercase',
-    userSelect: 'none'
+    userSelect: 'none',
+    textShadow: '0 0 20px var(--primary-glow)'
   };
 
   const buttonStyle = {
     padding: '0.75rem 1.5rem',
-    background: '#28a745',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
+    background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
+    color: '#fff',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    borderRadius: '8px',
     cursor: 'pointer',
     fontSize: '1rem',
-    fontWeight: 'bold'
+    fontWeight: '600',
+    transition: 'all 0.2s',
+    boxShadow: '0 4px 12px var(--primary-glow)'
   };
 
   const renderRule = (rule) => {
@@ -436,8 +433,8 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
               <div style={cardStyle}>
                 <div style={{ color: '#ffd600', fontSize: '1.5rem', marginBottom: '16px' }}>Question:</div>
                 {question.rules.map((rule, index) => (
-                  <div 
-                    key={index} 
+                  <div
+                    key={index}
                     style={{ color: '#e0e0e0', fontSize: '1.1rem', whiteSpace: 'pre-wrap', marginBottom: '8px' }}
                     dangerouslySetInnerHTML={{ __html: rule.content }}
                   />
@@ -486,29 +483,33 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        marginTop: '32px',
-        marginBottom: '32px',
+        margin: '2rem 0',
         position: 'relative',
         width: '100%',
         maxWidth: 1200,
       }}>
         <button
           onClick={() => setSettingsOpen(true)}
+          className="glass-panel"
           style={{
-            padding: '8px 16px',
-            background: '#6c757d',
-            color: 'white',
-            border: 'none',
-            borderRadius: 4,
+            padding: '0.75rem 1.25rem',
+            color: 'var(--text-secondary)',
+            border: '1px solid var(--glass-border)',
             cursor: 'pointer',
-            fontSize: '1.2rem',
+            fontSize: '1rem',
             position: 'absolute',
             left: 0,
             top: '50%',
             transform: 'translateY(-50%)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            transition: 'var(--transition-fast)'
           }}
+          onMouseEnter={e => e.currentTarget.style.color = 'var(--text-primary)'}
+          onMouseLeave={e => e.currentTarget.style.color = 'var(--text-secondary)'}
         >
-          ⚙️ Settings
+          <span>⚙️</span> Settings
         </button>
         <div style={{
           flex: 1,
@@ -516,15 +517,15 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
           justifyContent: 'center',
           alignItems: 'center',
         }}>
-          <span style={{
-            color: 'white',
-            fontSize: '3rem',
-            fontWeight: 'bold',
-            letterSpacing: '0.1em',
-            textShadow: '0 4px 24px rgba(0,0,0,0.3)'
+          <h1 className="text-gradient" style={{
+            fontSize: '3.5rem',
+            fontWeight: '800',
+            letterSpacing: '-0.02em',
+            margin: 0,
+            lineHeight: 1
           }}>
             SignAil
-          </span>
+          </h1>
         </div>
       </div>
       {/* Timer centered above the question block */}
@@ -533,13 +534,18 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
+        marginBottom: '2rem'
       }}>
-        <div style={{
-          fontSize: '4rem',
-          color: 'white',
-          fontWeight: 'bold',
-          textShadow: '0 4px 24px rgba(0,0,0,0.3)',
-          marginBottom: '8px',
+        <div className="glass-panel" style={{
+          fontSize: '5rem',
+          color: 'var(--text-primary)',
+          fontWeight: '800',
+          padding: '1.5rem 3rem',
+          borderRadius: '24px',
+          background: 'var(--glass-bg)',
+          border: '2px solid var(--primary)',
+          boxShadow: '0 0 30px var(--primary-glow), var(--glass-shadow)',
+          fontVariantNumeric: 'tabular-nums'
         }}>
           {timer}
         </div>
@@ -562,10 +568,11 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
         </div>
       </div>
       {/* Action buttons (Show Question/Show Answer/Show Response/Back to Game) */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginBottom: 24 }}>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
         {isAdmin && !isQuestionRevealed && (
           <button
             onClick={handleShowQuestion}
+            className="btn-primary"
             style={buttonStyle}
           >
             Show Question
@@ -574,6 +581,7 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
         {isAdmin && isQuestionRevealed && !isAnswerRevealed && (
           <button
             onClick={handleShowAnswer}
+            className="btn-primary"
             style={buttonStyle}
           >
             Show Answer
@@ -582,6 +590,7 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
         {isAdmin && isAnswerRevealed && !isResponseRevealed && question.after_round && question.after_round.length > 0 && (
           <button
             onClick={handleShowAfterRound}
+            className="btn-primary"
             style={buttonStyle}
           >
             Show Response
@@ -590,9 +599,11 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
         {isAdmin && (
           <button
             onClick={handleReturnToGame}
+            className="btn-primary"
             style={{
               ...buttonStyle,
-              background: '#dc3545'
+              background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+              boxShadow: '0 4px 12px rgba(239, 68, 68, 0.4)'
             }}
           >
             Back to Game
@@ -601,8 +612,8 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
       </div>
       {/* Online users below the board */}
       <div style={{ width: '100%', maxWidth: 1200, margin: 0, padding: 0, lineHeight: 1 }}>
-        <OnlineUsers 
-          users={onlineUsers} 
+        <OnlineUsers
+          users={onlineUsers}
           elapsedTime={elapsedTime}
           currentUserId={currentUserId}
           userTimes={userTimes}

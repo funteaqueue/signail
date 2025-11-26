@@ -48,122 +48,108 @@ const LoginPage = ({ onLogin }) => {
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      height: '100vh',
-      background: '#f5f5f5'
+      minHeight: '100vh',
+      padding: '1rem'
     }}>
-      <div style={{
-        background: 'white',
-        padding: '2rem',
-        borderRadius: '8px',
-        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+      <div className="glass-panel fade-in" style={{
+        padding: '2.5rem',
         width: '100%',
-        maxWidth: '400px'
+        maxWidth: '420px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1.5rem'
       }}>
-        <h1 style={{ marginBottom: '1.5rem', textAlign: 'center' }}>Login</h1>
+        <div style={{ textAlign: 'center' }}>
+          <h1 className="text-gradient" style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Signail</h1>
+          <p style={{ color: 'var(--text-secondary)' }}>Enter the game arena</p>
+        </div>
+
         {error && (
           <div style={{
-            color: '#dc3545',
-            marginBottom: '1rem',
-            padding: '0.5rem',
-            background: '#f8d7da',
-            borderRadius: '4px'
+            color: '#ef4444',
+            padding: '0.75rem',
+            background: 'rgba(239, 68, 68, 0.1)',
+            border: '1px solid rgba(239, 68, 68, 0.2)',
+            borderRadius: '8px',
+            fontSize: '0.875rem',
+            textAlign: 'center'
           }}>
             {error}
           </div>
         )}
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem' }}>
-              Name:
+
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+              Player Name
             </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '0.5rem',
-                border: '1px solid #ddd',
-                borderRadius: '4px'
-              }}
+              placeholder="Enter your name"
+              autoFocus
             />
           </div>
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem' }}>
-              Image URL:
-            </label>
-            <div style={{ fontSize: '0.8rem', marginBottom: '0.5rem' }}>
-              <a href="https://giphy.com" target="_blank" rel="noopener noreferrer" style={{ color: '#007bff', textDecoration: 'none' }}>
-                upload
+
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <label style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+                Avatar URL
+              </label>
+              <a 
+                href="https://giphy.com" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                style={{ color: 'var(--accent)', textDecoration: 'none', fontSize: '0.875rem' }}
+              >
+                Find GIF
               </a>
             </div>
-            {showPreview && (
-              <div style={{
-                width: 80,
-                height: 80,
-                margin: '0 auto 0.5rem auto',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: 12,
-                border: '2px solid #eee',
-                background: '#fafafa',
-                overflow: 'hidden',
-              }}>
-                {imageUrl.toLowerCase().endsWith('.mp4') ? (
-                  <video
-                    src={imageUrl}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      borderRadius: 12,
-                    }}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                  />
-                ) : (
-                  <img
-                    src={imageUrl}
-                    alt="preview"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      borderRadius: 12,
-                    }}
-                    onError={e => { e.target.style.display = 'none'; }}
-                  />
-                )}
-              </div>
-            )}
+            
             <input
               type="text"
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '0.5rem',
-                border: '1px solid #ddd',
-                borderRadius: '4px'
-              }}
+              placeholder="Paste image or GIF URL"
             />
           </div>
+
+          {showPreview && (
+            <div style={{
+              width: '100px',
+              height: '100px',
+              margin: '0 auto',
+              borderRadius: '50%',
+              border: '2px solid var(--primary)',
+              padding: '2px',
+              background: 'var(--bg-dark)',
+              overflow: 'hidden',
+              position: 'relative'
+            }}>
+              {imageUrl.toLowerCase().endsWith('.mp4') ? (
+                <video
+                  src={imageUrl}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
+                  autoPlay loop muted playsInline
+                />
+              ) : (
+                <img
+                  src={imageUrl}
+                  alt="preview"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
+                  onError={e => { e.target.style.display = 'none'; }}
+                />
+              )}
+            </div>
+          )}
+
           <button
             type="submit"
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              background: '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}
+            className="btn-primary"
+            style={{ width: '100%', marginTop: '0.5rem' }}
           >
-            Login
+            Join Game
           </button>
         </form>
       </div>
@@ -171,4 +157,5 @@ const LoginPage = ({ onLogin }) => {
   );
 };
 
-export default LoginPage; 
+export default LoginPage;
+ 
