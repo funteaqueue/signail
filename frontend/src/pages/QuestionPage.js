@@ -378,7 +378,7 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
   const themeHeaderStyle = {
     color: 'var(--text-primary)',
     fontWeight: '700',
-    fontSize: '2rem',
+    fontSize: '1.5rem',
     textAlign: 'center',
     borderRadius: '12px',
     margin: '0',
@@ -408,6 +408,7 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
     if (rule.type === 'embedded') {
       return (
         <div
+          className="question-content"
           style={{ color: '#e0e0e0', fontSize: '1.1rem', whiteSpace: 'pre-wrap' }}
           dangerouslySetInnerHTML={{ __html: rule.content }}
         />
@@ -435,6 +436,7 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
                 {question.rules.map((rule, index) => (
                   <div
                     key={index}
+                    className="question-content"
                     style={{ color: '#e0e0e0', fontSize: '1.1rem', whiteSpace: 'pre-wrap', marginBottom: '8px' }}
                     dangerouslySetInnerHTML={{ __html: rule.content }}
                   />
@@ -444,6 +446,7 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
             <div style={cardStyle}>
               {afterRoundRules[lastRuleIndex].type === 'embedded' ? (
                 <div
+                  className="question-content"
                   style={{ color: '#e0e0e0', fontSize: '1.1rem', whiteSpace: 'pre-wrap' }}
                   dangerouslySetInnerHTML={{ __html: afterRoundRules[lastRuleIndex].content }}
                 />
@@ -463,6 +466,7 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
         <div style={cardStyle}>
           {rules[lastRuleIndex].type === 'embedded' ? (
             <div
+              className="question-content"
               style={{ color: '#e0e0e0', fontSize: '1.1rem', whiteSpace: 'pre-wrap' }}
               dangerouslySetInnerHTML={{ __html: rules[lastRuleIndex].content }}
             />
@@ -534,13 +538,13 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: '2rem'
+        marginBottom: '1rem'
       }}>
         <div className="glass-panel" style={{
-          fontSize: '5rem',
+          fontSize: '2.5rem',
           color: 'var(--text-primary)',
           fontWeight: '800',
-          padding: '1.5rem 3rem',
+          padding: '0.75rem 1.5rem',
           borderRadius: '24px',
           background: 'var(--glass-bg)',
           border: '2px solid var(--primary)',
@@ -568,7 +572,7 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
         </div>
       </div>
       {/* Action buttons (Show Question/Show Answer/Show Response/Back to Game) */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
         {isAdmin && !isQuestionRevealed && (
           <button
             onClick={handleShowQuestion}

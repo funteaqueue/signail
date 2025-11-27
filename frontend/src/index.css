@@ -147,6 +147,15 @@ textarea::placeholder {
   color: var(--text-muted);
 }
 
+/* Media Elements - Only in Question Content */
+.question-content img,
+.question-content video {
+  height: 500px !important;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+
 /* Animations */
 .fade-in {
   animation: fadeIn 0.5s ease-in;
