@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import config from '../config';
 
 const PackUploadPage = () => {
@@ -7,6 +8,7 @@ const PackUploadPage = () => {
     const [error, setError] = useState('');
     const [uploadProgress, setUploadProgress] = useState(0);
     const [isUploading, setIsUploading] = useState(false);
+    const navigate = useNavigate();
 
     const handleFileChange = (event) => {
         const selectedFile = event.target.files[0];
@@ -107,6 +109,20 @@ const PackUploadPage = () => {
                 flexDirection: 'column',
                 gap: '2rem'
             }}>
+                <button
+                    onClick={() => navigate('/admin')}
+                    className="btn-primary"
+                    style={{
+                        alignSelf: 'flex-start',
+                        background: 'rgba(255, 255, 255, 0.08)',
+                        color: 'var(--text-primary)',
+                        boxShadow: 'none',
+                        border: '1px solid var(--glass-border)'
+                    }}
+                >
+                    Back to Admin
+                </button>
+
                 <h1 className="text-gradient" style={{
                     fontSize: '3rem',
                     fontWeight: '800',

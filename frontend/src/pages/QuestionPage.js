@@ -365,7 +365,7 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
     margin: '0',
     padding: '2rem',
     border: '1px solid var(--glass-border)',
-    userSelect: 'none',
+    userSelect: 'text',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
