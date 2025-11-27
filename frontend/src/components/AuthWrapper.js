@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import LoginPage from './LoginPage';
 import wsManager from '../utils/websocket';
 import config from '../config';
@@ -154,6 +155,20 @@ const AuthWrapper = ({ children, isAdmin = false }) => {
           }}>
             Admin Mode
           </div>
+          <Link
+            to="/admin/pack"
+            style={{
+              padding: '0.35rem 0.75rem',
+              background: '#007bff',
+              color: 'white',
+              borderRadius: '4px',
+              fontWeight: 'bold',
+              textDecoration: 'none',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.15)'
+            }}
+          >
+            upload new pack
+          </Link>
         </div>
         {React.cloneElement(children, { onlineUsers, isAdmin })}
       </div>
