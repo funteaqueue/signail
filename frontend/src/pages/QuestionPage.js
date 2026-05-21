@@ -88,6 +88,7 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
   const [currentUserId, setCurrentUserId] = useState(null);
   const [hasRecordedTime, setHasRecordedTime] = useState(false);
   const [userTimes, setUserTimes] = useState({});
+  const [clickedIndices, setClickedIndices] = useState(new Set());
 
   useEffect(() => {
     const loadQuestion = async () => {
@@ -168,6 +169,7 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
         setUserTimes({});
         setElapsedTime(null);
         setHasRecordedTime(false);
+        setClickedIndices(new Set());
       }
     });
     return () => {
@@ -225,7 +227,11 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
 
   // Helper to calculate total duration from question rules
   const getInitialTimerValue = (question) => {
-    if (!question || !question.rules || question.rules.length === 0) return 15;
+    if (!question) return 15;
+    if (question.type === 'find-a-cat') {
+      return question.duration || 60;
+    }
+    if (!question.rules || question.rules.length === 0) return 15;
     return question.rules.reduce((sum, rule) => sum + (rule.duration || 15), 0);
   };
 
@@ -250,6 +256,9 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
   // Add keyboard event listener for space and right arrow
   useEffect(() => {
     const handleKeyPress = (event) => {
+      if (question?.type === 'find-a-cat') {
+        return; // Disable spacebar/ArrowRight answer submission for find-a-cat
+      }
       if ((event.code === 'Space' || event.code === 'ArrowRight') &&
         ((isAdmin && isQuestionRevealed && !isAnswerRevealed) || (!isAdmin && !isAnswerRevealed)) &&
         !hasRecordedTime &&
@@ -279,16 +288,30 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
       setElapsedTime(null);
       setHasRecordedTime(false);
       setUserTimes({}); // Reset all user times when starting new question
+      setClickedIndices(new Set()); // Reset clicked indices for new question!
     }
   }, [isQuestionRevealed, isAnswerRevealed, isAdmin]);
+
+  // Sync clickedIndices when page is loaded/refreshed and user has already recorded time
+  useEffect(() => {
+    if (currentUserId && userTimes[currentUserId] !== undefined && question && question.type === 'find-a-cat' && question.map) {
+      setHasRecordedTime(true);
+      setClickedIndices(new Set(question.map.map((_, i) => i)));
+    }
+  }, [userTimes, currentUserId, question]);
 
   const handleShowQuestion = () => {
     if (isAdmin && question) {
       wsManager.sendQuestionReveal(question.id);
       setIsQuestionRevealed(true);
-      setIsAnswerRevealed(true);
-      setShowAfterRound(true);
-      setCurrentAfterRoundIndex(0);
+      if (question.type !== 'find-a-cat') {
+        setIsAnswerRevealed(true);
+        setShowAfterRound(true);
+        setCurrentAfterRoundIndex(0);
+      } else {
+        setIsAnswerRevealed(false);
+        setShowAfterRound(false);
+      }
     }
   };
 
@@ -423,7 +446,193 @@ const QuestionPage = ({ isAdmin = false, isReadOnly = false, onlineUsers = [] })
     return null;
   };
 
+
+
+  const handleAreaClick = (index) => {
+    if (isAnswerRevealed || hasRecordedTime || (currentUserId && userTimes[currentUserId])) {
+      return;
+    }
+    if (clickedIndices.has(index)) {
+      return;
+    }
+
+    const newClicked = new Set(clickedIndices);
+    newClicked.add(index);
+    setClickedIndices(newClicked);
+
+    if (isAdmin) {
+      // Admin doesn't submit time
+      return;
+    }
+
+    const totalAreas = question.map ? question.map.length : 0;
+    const remaining = totalAreas - newClicked.size;
+
+    if (remaining === 0) {
+      const endTime = Date.now();
+      const timeTaken = (endTime - startTime) / 1000;
+      setElapsedTime(timeTaken);
+      setHasRecordedTime(true);
+      wsManager.sendElapsedTime(parseInt(questionId), timeTaken, currentUserId);
+      console.log('=== SCORE LOG (Find a Cat) ===');
+      console.log(`Score: ${question?.price?.correct || 0} points`);
+      console.log(`Time taken: ${timeTaken.toFixed(3)} seconds`);
+      console.log('================');
+    }
+  };
+
+  const renderFindACatContent = () => {
+    const totalAreas = question.map ? question.map.length : 0;
+    const remainingCount = totalAreas - clickedIndices.size;
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', gap: '1.5rem' }}>
+        {/* Helper message */}
+        <div className="glass-panel" style={{
+          padding: '1rem 2rem',
+          fontSize: '1.4rem',
+          fontWeight: '700',
+          color: 'var(--text-primary)',
+          textAlign: 'center',
+          border: '1px solid var(--glass-border)',
+          width: '100%',
+          maxWidth: '800px',
+          boxShadow: 'var(--glass-shadow)',
+          textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+        }}>
+          {remainingCount > 0 
+            ? `Знайдіть і клікніть на всіх ${question.name || ''}. Залишилось всього ${remainingCount}`
+            : `Ви знайшли всіх ${question.name || ''}!`}
+        </div>
+
+        {/* Image Container with map areas */}
+        <div style={{
+          position: 'relative',
+          display: 'inline-block',
+          width: '100%',
+          maxWidth: '800px',
+          borderRadius: '16px',
+          overflow: 'hidden',
+          boxShadow: '0 12px 40px rgba(0,0,0,0.6)',
+          border: '1px solid var(--glass-border)'
+        }}>
+          <img 
+            src={question.image} 
+            alt={question.name} 
+            style={{ 
+              width: '100%', 
+              height: 'auto', 
+              display: 'block', 
+              userSelect: 'none',
+              pointerEvents: 'none'
+            }} 
+          />
+          {/* Overlay Map Areas */}
+          {question.map && question.map.map((area, idx) => {
+            const isClicked = clickedIndices.has(idx);
+            const showArea = isAnswerRevealed || isClicked; // Show area if answer is revealed or if the user clicked it
+
+            // Determine custom styles and colors from map area
+            let backgroundColor = 'transparent';
+            let border = 'none';
+            let boxShadow = 'none';
+
+            if (showArea) {
+              const style = area.style || {};
+              const customBg = style.background || style.backgroundColor || area.background || area.color;
+              
+              let bg = 'rgba(239, 68, 68, 0.1)';
+              let borderStyle = '2px solid #ef4444';
+              let shadowStyle = '0 0 12px rgba(239, 68, 68, 0.6)';
+
+              if (customBg) {
+                // Try to determine a solid base color to use for border/shadow if not overridden
+                let solidColor = customBg;
+                if (typeof customBg === 'string') {
+                  const rgbaMatch = customBg.match(/rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\d.]+)\s*\)/);
+                  if (rgbaMatch) {
+                    solidColor = `rgb(${rgbaMatch[1]}, ${rgbaMatch[2]}, ${rgbaMatch[3]})`;
+                  } else if (customBg.startsWith('#') && customBg.length === 9) {
+                    solidColor = customBg.substring(0, 7);
+                  }
+                }
+
+                bg = `color-mix(in srgb, ${solidColor} 10%, transparent)`;
+                borderStyle = `2px solid ${solidColor}`;
+                shadowStyle = `0 0 12px ${solidColor}`;
+              }
+
+              if (style.border) {
+                borderStyle = style.border;
+              } else if (style.borderColor) {
+                borderStyle = `2px solid ${style.borderColor}`;
+              } else if (area.borderColor) {
+                borderStyle = `2px solid ${area.borderColor}`;
+              }
+
+              if (style.boxShadow) {
+                shadowStyle = style.boxShadow;
+              }
+
+              backgroundColor = bg;
+              border = borderStyle;
+              boxShadow = shadowStyle;
+            }
+
+            const areaStyle = {
+              position: 'absolute',
+              left: area.left,
+              top: area.top,
+              width: area.width,
+              height: area.height,
+              cursor: 'default',
+              backgroundColor,
+              border,
+              boxShadow,
+              borderRadius: '8px',
+              transition: 'background-color 0.2s, border 0.2s, box-shadow 0.2s',
+              // Disable clicks if already clicked, answer revealed, or current user has recorded time (unless admin, who can click for demo, but only if not revealed yet)
+              pointerEvents: isClicked || isAnswerRevealed || (!isAdmin && hasRecordedTime) ? 'none' : 'auto'
+            };
+
+            return (
+              <div 
+                key={idx} 
+                style={areaStyle} 
+                onClick={() => handleAreaClick(idx)}
+                title={isAdmin && isAnswerRevealed ? `Area ${idx + 1}` : ''}
+              />
+            );
+          })}
+        </div>
+
+        {/* If answer is revealed and there are after-round rules, display them below */}
+        {showAfterRound && question.after_round && question.after_round.length > 0 && (
+          <div style={{ ...cardStyle, width: '100%', maxWidth: '800px', minHeight: 'auto', padding: '1.5rem', marginTop: '1rem' }}>
+            {question.after_round.map((rule, index) => (
+              <div key={index} style={{ width: '100%' }}>
+                {rule.type === 'embedded' ? (
+                  <div
+                    className="question-content"
+                    style={{ color: '#e0e0e0', fontSize: '1.1rem', whiteSpace: 'pre-wrap' }}
+                    dangerouslySetInnerHTML={{ __html: rule.content }}
+                  />
+                ) : (
+                  renderRule(rule)
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const renderContent = () => {
+    if (question.type === 'find-a-cat') {
+      return renderFindACatContent();
+    }
+
     if (showAfterRound) {
       const afterRoundRules = question.after_round || [];
       if (afterRoundRules.length > 0) {

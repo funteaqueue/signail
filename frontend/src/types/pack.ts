@@ -22,6 +22,21 @@ export interface Question {
   type: QuestionType;
   rules?: Rule[];
   after_round?: Rule[];
+  image?: string;
+  name?: string;
+  map?: FindACatArea[];
+  duration?: number;
+}
+
+export interface FindACatArea {
+  left: string;
+  top: string;
+  width: string;
+  height: string;
+  style?: {
+    background?: string;
+    [key: string]: any;
+  };
 }
 
 export interface Price {
@@ -41,7 +56,8 @@ export interface Rule {
 export enum QuestionType {
   Normal = 'normal',
   Secret = 'secret',
-  Empty = 'empty'
+  Empty = 'empty',
+  FindACat = 'find-a-cat'
 }
 
 export enum RuleType {

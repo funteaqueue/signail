@@ -1,0 +1,57 @@
+{
+  "author": "Tester",
+  "name": "Find-a-Cat Test Pack",
+  "rounds": [
+    {
+      "name": "Round 1",
+      "themes": [
+        {
+          "name": "Hidden Cats",
+          "description": "Find all the hidden cats in the image!",
+          "ordered": true,
+          "questions": [
+            {
+              "id": 9999,
+              "price": {
+                "text": "100",
+                "correct": 100,
+                "incorrect": -50,
+                "random_range": "null"
+              },
+              "type": "find-a-cat",
+              "name": "котиків",
+              "image": "https://i.ibb.co/hJYzGbD2/image-2026-05-21-173054687.png",
+              "map": [
+                {
+                  "width": "8.42997542997543%",
+                  "height": "12.000000000000002%",
+                  "left": "63.80016380016381%",
+                  "top": "20.066889632107024%"
+                },
+                {
+                  "width": "20.22932022932023%",
+                  "height": "15.317725752508359%",
+                  "left": "59.63477682227683%",
+                  "top": "46.020066889632105%"
+                },
+                {
+                  "width": "16.625716625716624%",
+                  "height": "23.812709030100336%",
+                  "left": "55.048372235872236%",
+                  "top": "62.207357859531776%"
+                },
+                {
+                  "width": "7.944307944307945%",
+                  "height": "12.107023411371237%",
+                  "left": "24.663441850941847%",
+                  "top": "23.1438127090301%"
+                }
+              ],
+              "duration": 60
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

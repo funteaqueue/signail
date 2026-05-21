@@ -105,6 +105,7 @@ app.post('/api/users/:userId/score', express.json(), (req, res) => {
     // Update the score
     userData.score = score;
     wsManager.persistentUsers.set(userId, userData);
+    wsManager.userScores.set(userId, score);
 
     // Broadcast the updated user list to all clients
     wsManager.broadcastOnlineUsers();

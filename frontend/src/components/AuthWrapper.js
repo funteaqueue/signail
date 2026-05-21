@@ -9,6 +9,11 @@ const AuthWrapper = ({ children, isAdmin = false }) => {
   const [loading, setLoading] = useState(true);
   const [onlineUsers, setOnlineUsers] = useState([]);
 
+  const userRef = React.useRef(user);
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
+
   const fetchOnlineUsers = async () => {
     try {
       const response = await fetch(`${config.apiUrl}/api/users/online`);
@@ -29,6 +34,16 @@ const AuthWrapper = ({ children, isAdmin = false }) => {
     const unsubscribe = wsManager.subscribe((data) => {
       if (data.type === 'online_users') {
         setOnlineUsers(data.data);
+
+        // Sync local user score with the server score broadcast
+        if (userRef.current) {
+          const currentUserInfo = data.data.find(u => u.id === userRef.current.id);
+          if (currentUserInfo && currentUserInfo.score !== userRef.current.score) {
+            const updatedUser = { ...userRef.current, score: currentUserInfo.score };
+            setUser(updatedUser);
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+          }
+        }
       }
     });
 

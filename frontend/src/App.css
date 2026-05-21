@@ -1,86 +1,86 @@
 .App {
-  text-align: center;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  color: var(--text-primary);
+    text-align: center;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    color: var(--text-primary);
 }
 
 .App-header {
-  background: rgba(15, 23, 42, 0.8);
-  backdrop-filter: blur(10px);
-  padding: var(--spacing-md) var(--spacing-xl);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--glass-border);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(10px);
+    padding: var(--spacing-md) var(--spacing-xl);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--glass-border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
 .App-header h1 {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .connection-status {
-  font-size: 0.875rem;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: 9999px;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
+    font-size: 0.875rem;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: 9999px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
 }
 
 .main-content {
-  flex: 1;
-  padding: var(--spacing-xl);
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
+    flex: 1;
+    padding: var(--spacing-xl);
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
 }
 
 /* Common Form Elements */
 input {
-  width: 100%;
-  padding: 12px 16px;
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid var(--glass-border);
-  border-radius: 12px;
-  color: var(--text-primary);
-  font-size: 1rem;
-  transition: var(--transition-fast);
-  font-family: inherit;
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: var(--transition-fast);
+    font-family: inherit;
 }
 
 input:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px var(--primary-glow);
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--primary-glow);
 }
 
 button {
-  font-family: inherit;
+    font-family: inherit;
 }
 
 /* Animations */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
 
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .fade-in {
-  animation: fadeIn 0.5s ease-out forwards;
+    animation: fadeIn 0.5s ease-out forwards;
 }

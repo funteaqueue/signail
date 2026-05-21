@@ -26,6 +26,10 @@
  * @property {QuestionType} type - Type of the question
  * @property {Rule[]} [rules] - Optional rules for the question
  * @property {Rule[]} [after_round] - Optional rules to apply after the round
+ * @property {string} [image] - Image path for find-a-cat
+ * @property {string} [name] - Target name for find-a-cat
+ * @property {Object[]} [map] - Map areas for find-a-cat
+ * @property {number} [duration] - Optional duration for the question
  */
 
 /**
@@ -50,7 +54,8 @@
 const QuestionType = {
     Normal: 'normal',
     Secret: 'secret',
-    Empty: 'empty'
+    Empty: 'empty',
+    FindACat: 'find-a-cat'
 };
 
 /**

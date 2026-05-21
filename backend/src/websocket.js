@@ -6,6 +6,7 @@ class WebSocketManager {
     this.wss = null;
     this.onlineUsers = new Map(); // Map of user data by WebSocket connection
     this.persistentUsers = new Map(); // Map of user data by userId
+    this.userScores = new Map(); // Map of score by userId (persisted across reloads/disconnections)
     this.selectedQuestions = new Set(); // Track selected questions
     this.questionTimes = new Map(); // Map of question ID to user times
     this.lastGreenFrameUser = null; // Track the last user with green frame
@@ -33,9 +34,14 @@ class WebSocketManager {
             if (!userData.id) {
               userData.id = `${userData.name}-${Date.now()}`;
             }
-            // Ensure score is present
-            if (typeof userData.score !== 'number') {
-              userData.score = 0;
+            // Restore score if user is reconnecting, otherwise initialize
+            if (this.userScores.has(userData.id)) {
+              userData.score = this.userScores.get(userData.id);
+            } else {
+              if (typeof userData.score !== 'number') {
+                userData.score = 0;
+              }
+              this.userScores.set(userData.id, userData.score);
             }
             // Store user data with their WebSocket connection
             this.onlineUsers.set(ws, userData);
@@ -103,24 +109,26 @@ class WebSocketManager {
             this.persistentUsers.forEach(userData => {
               userData.score = 0;
             });
+            this.userScores.clear(); // Clear all saved scores
             // Broadcast updated selected questions to all clients
             this.broadcastSelectedQuestions();
             // Broadcast updated user list to all clients
             this.broadcastOnlineUsers();
-      } else if (data.type === 'update_score') {
-        const { userId, score } = data.data;
-        const userData = this.persistentUsers.get(userId);
-        if (userData) {
-          const numericScore = Number(score);
-          if (!Number.isFinite(numericScore)) {
-            console.warn(`Ignored invalid score value for user ${userId}:`, score);
-            return;
-          }
-          userData.score = numericScore;
-          this.persistentUsers.set(userId, userData);
-          // Broadcast updated user list to all clients
-          this.broadcastOnlineUsers();
-        }
+          } else if (data.type === 'update_score') {
+            const { userId, score } = data.data;
+            const userData = this.persistentUsers.get(userId);
+            if (userData) {
+              const numericScore = Number(score);
+              if (!Number.isFinite(numericScore)) {
+                console.warn(`Ignored invalid score value for user ${userId}:`, score);
+                return;
+              }
+              userData.score = numericScore;
+              this.persistentUsers.set(userId, userData);
+              this.userScores.set(userId, numericScore); // Persist score
+              // Broadcast updated user list to all clients
+              this.broadcastOnlineUsers();
+            }
           } else if (data.type === 'round_change') {
             // Broadcast round change to all clients
             this.broadcastRoundChange(data.data);
